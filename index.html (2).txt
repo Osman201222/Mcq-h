@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>SSC Chorcha Style MCQ</title>
+
+<!-- Google Font (Chorcha-like clean font) -->
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#5b2dff;
+  --secondary:#ffb703;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --text:#222;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:'Hind Siliguri', sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* Header */
+header{
+  background:var(--primary);
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+  font-weight:700;
+}
+
+/* Container */
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:15px;
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+/* Button */
+.btn{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+}
+.btn:hover{opacity:.9}
+
+/* Question */
+.option{
+  margin:8px 0;
+  padding:10px;
+  border:2px solid #ddd;
+  border-radius:8px;
+  cursor:pointer;
+}
+.option:hover{
+  border-color:var(--primary);
+}
+
+/* Leaderboard */
+.leaderboard li{
+  list-style:none;
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+
+/* Certificate */
+#certificate{
+  display:none;
+  text-align:center;
+}
+.cert-box{
+  border:6px solid var(--secondary);
+  padding:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>📘 SSC Chorcha MCQ Practice</header>
+
+<div class="container">
+
+<!-- Login -->
+<div class="card" id="loginBox">
+  <h3>👤 Student Login</h3>
+  <input id="username" placeholder="আপনার নাম লিখুন" style="width:100%;padding:10px">
+  <br><br>
+  <button class="btn" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<!-- Quiz -->
+<div class="card" id="quizBox" style="display:none">
+  <h3 id="qText"></h3>
+  <div id="options"></div>
+  <button class="btn" onclick="nextQuestion()">Next</button>
+</div>
+
+<!-- Result -->
+<div class="card" id="resultBox" style="display:none">
+  <h2>🎯 Result</h2>
+  <p id="scoreText"></p>
+  <button class="btn" onclick="showCertificate()">🏆 Generate Certificate</button>
+</div>
+
+<!-- Leaderboard -->
+<div class="card">
+  <h3>📊 Leaderboard</h3>
+  <ul class="leaderboard" id="leaderboard"></ul>
+</div>
+
+<!-- Certificate -->
+<div class="card" id="certificate">
+  <div class="cert-box">
+    <h1>Certificate of Achievement</h1>
+    <p>This certifies that</p>
+    <h2 id="certName"></h2>
+    <p>has successfully completed the SSC MCQ Test</p>
+    <h3 id="certScore"></h3>
+  </div>
+</div>
+
+</div>
+
+<script>
+let questions = [
+  {q:"পৃথিবীপৃষ্ঠের কত ভাগ পানি?", o:["60%","70%","75%","85%"], a:1},
+  {q:"শর্করা থেকে শক্তি?", o:["2 kcal","4 kcal","6 kcal","9 kcal"], a:1}
+];
+
+let index=0, score=0, user="";
+
+function startQuiz(){
+  user=document.getElementById("username").value;
+  if(!user) return alert("নাম দিন");
+  loginBox.style.display="none";
+  quizBox.style.display="block";
+  loadQuestion();
+}
+
+function loadQuestion(){
+  let q=questions[index];
+  qText.innerText=(index+1)+". "+q.q;
+  options.innerHTML="";
+  q.o.forEach((op,i)=>{
+    let div=document.createElement("div");
+    div.className="option";
+    div.innerText=op;
+    div.onclick=()=>{ if(i===q.a) score++; nextQuestion(); };
+    options.appendChild(div);
+  });
+}
+
+function nextQuestion(){
+  index++;
+  if(index<questions.length) loadQuestion();
+  else showResult();
+}
+
+function showResult(){
+  quizBox.style.display="none";
+  resultBox.style.display="block";
+  scoreText.innerText=`${user}, আপনার স্কোর: ${score}/${questions.length}`;
+  saveLeaderboard();
+}
+
+function saveLeaderboard(){
+  let data=JSON.parse(localStorage.getItem("board")||"[]");
+  data.push({name:user,score});
+  localStorage.setItem("board",JSON.stringify(data));
+  renderBoard();
+}
+
+function renderBoard(){
+  let data=JSON.parse(localStorage.getItem("board")||"[]");
+  leaderboard.innerHTML="";
+  data.sort((a,b)=>b.score-a.score).forEach(d=>{
+    let li=document.createElement("li");
+    li.innerText=`${d.name} — ${d.score}`;
+    leaderboard.appendChild(li);
+  });
+}
+renderBoard();
+
+function showCertificate(){
+  certificate.style.display="block";
+  certName.innerText=user;
+  certScore.innerText="Score: "+score+"/"+questions.length;
+}
+</script>
+
+</body>
+</html>
